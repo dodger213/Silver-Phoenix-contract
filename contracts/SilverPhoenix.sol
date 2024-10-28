@@ -125,28 +125,56 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
      * @param tokenAmount The amount of tokens to swap and send
      */
     function _swapAndSendFee(uint256 tokenAmount) internal {
+        uint256 initialBalance = address(this).balance;
+
         address[] memory path = new address[](2);
         path[0] = address(this);
         path[1] = uniswapV2Router.WETH();
-        _approve(address(this), address(uniswapV2Router), tokenAmount);
-        uniswapV2Router.swapExactTokensForETHSupportingFeeOnTransferTokens(
-            tokenAmount,
-            0,
-            path,
-            feeReceiver,
-            block.timestamp
-        );
+
+        //Swap tokens for ETH
+        try
+            uniswapV2Router.swapExactTokensForETHSupportingFeeOnTransferTokens(
+                tokenAmount,
+                0,
+                path,
+                feeReceiver,
+                block.timestamp
+            )
+        {} catch {
+            return;
+        }
+        uint256 newBalance = address(this).balance - initialBalance;
+        
+        //Send Fee to fee receiver
+        payable(feeReceiver).sendValue(newBalance);
         emit SwapAndSendFee(tokenAmount, address(this).balance);
-        _transfer(address(this), feeReceiver, address(this).balance);
     }
 
     /**
-    *@dev public function for changing fee receiver
-    *@param newFeeReceiver_ The address of the new fee receiver
-    */
+     *@dev public function for changing fee receiver
+     *@param newFeeReceiver_ The address of the new fee receiver
+     */
     function changeFeeReceiver(address newFeeReceiver_) external onlyOwner {
-      address oldReceiver = feeReceiver;
-      feeReceiver = newFeeReceiver_;
-      emit FeeReceiverChanged(oldReceiver, feeReceiver);
+        address oldReceiver = feeReceiver;
+        feeReceiver = newFeeReceiver_;
+        emit FeeReceiverChanged(oldReceiver, feeReceiver);
     }
+
+    function claimStuckTokens(address token) external onlyOwner {}
+
+    function excludeFromFees(
+        address account,
+        bool excluded
+    ) external onlyOwner {}
+
+    function isExcludedFromFees(address account) external view returns (bool) {}
+
+    function setSwapTokenAmount(
+        uint256 newSwapTokenAmount,
+        bool _swapEnabled
+    ) external onlyOwner {}
+
+    function enableTrading() external onlyOwner {}
+
+    receive() external payable {}
 }
