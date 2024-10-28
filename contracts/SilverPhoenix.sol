@@ -140,5 +140,13 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
         _transfer(address(this), feeReceiver, address(this).balance);
     }
 
-
+    /**
+    *@dev public function for changing fee receiver
+    *@param newFeeReceiver_ The address of the new fee receiver
+    */
+    function changeFeeReceiver(address newFeeReceiver_) external onlyOwner {
+      address oldReceiver = feeReceiver;
+      feeReceiver = newFeeReceiver_;
+      emit FeeReceiverChanged(oldReceiver, feeReceiver);
+    }
 }
