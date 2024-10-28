@@ -119,4 +119,26 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
             _transfer(from, to, amount);
         }
     }
+
+    /**
+     * @dev internal function for handling swap and send fee
+     * @param tokenAmount The amount of tokens to swap and send
+     */
+    function _swapAndSendFee(uint256 tokenAmount) internal {
+        address[] memory path = new address[](2);
+        path[0] = address(this);
+        path[1] = uniswapV2Router.WETH();
+        _approve(address(this), address(uniswapV2Router), tokenAmount);
+        uniswapV2Router.swapExactTokensForETHSupportingFeeOnTransferTokens(
+            tokenAmount,
+            0,
+            path,
+            feeReceiver,
+            block.timestamp
+        );
+        emit SwapAndSendFee(tokenAmount, address(this).balance);
+        _transfer(address(this), feeReceiver, address(this).balance);
+    }
+
+
 }
