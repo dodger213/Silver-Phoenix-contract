@@ -186,7 +186,19 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
         emit FeeReceiverChanged(oldReceiver, feeReceiver);
     }
 
-    function claimStuckTokens(address token) external onlyOwner {}
+    /**
+     * @dev claim stuck tokens from contract
+     *@param token The address of the token to claim
+     */
+    function claimStuckTokens(address token) external onlyOwner {
+        if (token == address(0x0)) {
+            payable(msg.sender).sendValue(address(this).balance);
+        }
+        IERC20(token).transfer(
+            msg.sender,
+            IERC20(token).balanceOf(address(this))
+        );
+    }
 
     function excludeFromFees(
         address account,
