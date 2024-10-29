@@ -108,8 +108,8 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
         );
 
         //Swap SPX tokens accumulated with fee in contract to ETH/BNB
-        uint256 accumulatedFee = balanceOf(address(this));
-        bool canSwap = accumulatedFee >= swapTokenAmount;
+        uint256 accumulatedFeeTokenAmount = balanceOf(address(this));
+        bool canSwap = accumulatedFeeTokenAmount >= swapTokenAmount;
 
         if (
             canSwap &&
@@ -119,7 +119,7 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
             !_isExcludedFromFee[from]
         ) {
             swapping = true;
-            _swapAndSendFee(accumulatedFee);
+            _swapAndSendFee(accumulatedFeeTokenAmount);
             swapping = false;
         }
 
@@ -152,28 +152,40 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
      * @param to The address of the recipient
      * @param amount The amount of tokens to transfer
      */
-    function _handleFee(address from, address to, uint256 amount) internal {
-        if (from != uniswapV2Pair && to != uniswapV2Pair) {
-            _transfer(from, to, amount);
-            return;
-        }
+    function transfer(address from, address to, uint256 amount) internal {
+        require(from !=address(0), "ERC20: transfer from the zero address");
+        require(to != address(0), "ERC20: transfer to the zero address");
+        require(amount > 0, "Transfer amount must be greater than zero");
+        require(tradingEnabled || _isExcludedFromFee[from] || _isExcludedFromFee[to], "Trading is not enabled yet");
 
-        uint256 feeAmount = 0;
-        if (from == uniswapV2Pair) {
-            feeAmount = (amount * feeBuy) / 100;
-        } else if (to == uniswapV2Pair) {
-            feeAmount = (amount * feeSell) / 100;
-        } else {
-            feeAmount = (amount * feeTransfer) / 100;
-        }
+        //Swap mechanism
+        uint256 accumulatedFee = balanceOf(address(this));
+        bool canSwap = accumulatedFee >= swapTokenAmount;
 
-        if (feeAmount > 0) {
-            _transfer(from, feeReceiver, feeAmount);
-            amount -= feeAmount;
-            _transfer(from, to, amount);
-        } else {
-            _transfer(from, to, amount);
+        if(canSwap && swapEnabled && !swapping && to == uniswapV2Pair && !_isExcludedFromFee[from]) {
+            swapping = true;
+            _swapAndSendFee(accumulatedFee);
+            swapping = false;
         }
+        
+        //Handling fee token and transfer
+        uint256 totalFees;
+        if(_isExcludedFromFee[from] || _isExcludedFromFee[to] || swapping) {
+            totalFees = 0;
+         } else if(from == uniswapV2Pair) {
+            totalFees = feeBuy;
+         } else if(to == uniswapV2Pair) {
+            totalFees = feeSell;
+         }else {
+            totalFees = feeTransfer;
+         }
+
+         if(totalFees > 0) {
+            uint256 feeTokenAmount = (amount * totalFees) / 100;
+            amount = amount - feeTokenAmount;
+            super._transfer(from, address(this), feeTokenAmount);
+         }
+         super._transfer(from, to, amount);
     }
 
     /**
