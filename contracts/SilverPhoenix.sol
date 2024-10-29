@@ -72,6 +72,7 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
         _isExcludedFromFee[address(this)] = true;
         _isExcludedFromFee[feeReceiver] = true;
         _isExcludedFromFee[address(0)] = true;
+        _isExcludedFromFee[pinkLock] = true;
     }
 
     /**
