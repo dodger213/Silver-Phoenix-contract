@@ -100,13 +100,24 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
         require(amount > 0, "Transfer amount must be greater than zero");
-        require(tradingEnabled || _isExcludedFromFee[from] || _isExcludedFromFee[to], "Trading is not enabled yet");
+        require(
+            tradingEnabled ||
+                _isExcludedFromFee[from] ||
+                _isExcludedFromFee[to],
+            "Trading is not enabled yet"
+        );
 
         //Swap SPX tokens accumulated with fee in contract to ETH/BNB
         uint256 accumulatedFee = balanceOf(address(this));
         bool canSwap = accumulatedFee >= swapTokenAmount;
 
-        if (canSwap && swapEnabled && !swapping && to == uniswapV2Pair && from != uniswapV2Pair) {
+        if (
+            canSwap &&
+            swapEnabled &&
+            !swapping &&
+            to == uniswapV2Pair &&
+            !_isExcludedFromFee[from]
+        ) {
             swapping = true;
             _swapAndSendFee(accumulatedFee);
             swapping = false;
@@ -114,25 +125,25 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
 
         //Calculate fee and transfer tokens and fee
         uint256 totalFees;
-        if(_isExcludedFromFee[from] || _isExcludedFromFee[to] || swapping) {
+        if (_isExcludedFromFee[from] || _isExcludedFromFee[to] || swapping) {
             totalFees = 0;
-        } else if(from == uniswapV2Pair) { //Buy
+        } else if (from == uniswapV2Pair) {
+            //Buy
             totalFees = feeBuy;
-        } else if(to == uniswapV2Pair) { //Sell
+        } else if (to == uniswapV2Pair) {
+            //Sell
             totalFees = feeSell;
-        } else { //Transsfer
+        } else {
+            //Transsfer
             totalFees = feeTransfer;
         }
 
-        if(totalFees > 0) {
+        if (totalFees > 0) {
             uint256 feeTokenAmount = (amount * totalFees) / 100;
             amount = amount - feeTokenAmount;
             super._transfer(from, address(this), feeTokenAmount);
-        } else {
-            super._transfer(from, to, amount);
-            return;
         }
-        _transfer(from, to, amount);
+        super._transfer(from, to, amount);
     }
 
     /**
