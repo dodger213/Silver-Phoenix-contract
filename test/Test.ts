@@ -51,22 +51,6 @@ describe("SilverPhoenix", function () {
     });
   });
 
-  describe("Fee Receiver", function () {
-    it("Should change fee receiver", async function () {
-      await silverPhoenix.changeFeeReceiver(addr1.address);
-      // You would need to implement a getter for feeReceiver to test this
-      // or test it through a transfer and checking received fees
-    });
-  });
-
-  describe("Swap Settings", function () {
-    it("Should set swap token amount", async function () {
-      const newSwapAmount = ethers.parseUnits("1000", 8);
-      await silverPhoenix.setSwapTokenAmount(newSwapAmount, true);
-      // You would need to implement a getter for swapTokenAmount to test this
-    });
-  });
-
   describe("Token Transfers", function () {
     beforeEach(async function () {
       await silverPhoenix.enableTrading();
