@@ -17,11 +17,11 @@ const config: HardhatUserConfig = {
     },
   },
   networks: {
-    sepolia: {
+    eth_sepolia: {
       url: `https://sepolia.infura.io/v3/${infuraKey}`,
       accounts: [`0x${privateKey}`],
     },
-    mainnet: {
+    eth_mainnet: {
       url: `https://mainnet.infura.io/v3/${infuraKey}`,
       accounts: [`0x${privateKey}`],
     },
@@ -35,6 +35,16 @@ const config: HardhatUserConfig = {
     },
     holesky_testnet: {
       url: "https://ethereum-holesky-rpc.publicnode.com",
+      accounts: [`0x${privateKey}`],
+    },
+    bsc_mainnet: {
+      url: "https://bsc-dataseed1.binance.org",
+      chainId: 56,
+      accounts: [`0x${privateKey}`],
+    },
+    bsc_testnet: {
+      url: "https://data-seed-prebsc-1-s1.binance.org:8545",
+      chainId: 97,
       accounts: [`0x${privateKey}`],
     },
     hardhat: {
