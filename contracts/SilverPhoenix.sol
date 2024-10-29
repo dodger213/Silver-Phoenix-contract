@@ -23,6 +23,8 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
 
     uint256 swapTokenAmount;
 
+    bool swapEnabled;
+
     mapping(address => bool) private _isExcludedFromFee;
 
     event FeeReceiverChanged(
@@ -39,9 +41,6 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
     constructor() ERC20("Silver Phoenix", "SPX") Ownable(msg.sender) {
         address router;
         address pinkLock;
-
-        _mint(msg.sender, 1e9 * 10 ** decimals());
-        swapTokenAmount = totalSupply() / 5000;
 
         if (block.chainid == 56) {
             router = 0x10ED43C718714eb63d5aA57B78B54704E256024E; // BSC Pancake Mainnet Router
@@ -65,10 +64,59 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
 
         _approve(address(this), address(uniswapV2Router), type(uint256).max);
 
+        _mint(msg.sender, 1e9 * 10 ** decimals());
+        swapTokenAmount = totalSupply() / 5000;
+
         //Exclude fee on specific account
         _isExcludedFromFee[msg.sender] = true;
         _isExcludedFromFee[address(this)] = true;
         _isExcludedFromFee[feeReceiver] = true;
         _isExcludedFromFee[address(0)] = true;
+    }
+
+    /**
+     * @dev internal function for transferring tokens
+     * @param from The address of the sender
+     * @param to The address of the recipient
+     * @param amount The amount of tokens to transfer
+     */
+    function _transfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override {
+        require(from != address(0), "ERC20: transfer from the zero address");
+        require(to != address(0), "ERC20: transfer to the zero address");
+        require(amount > 0, "Transfer amount must be greater than zero");
+    }
+
+    /**
+     * @dev internal function for handling fee
+     * @param from The address of the sender
+     * @param to The address of the recipient
+     * @param amount The amount of tokens to transfer
+     */
+    function _handleFee(address from, address to, uint256 amount) internal {
+        if (from != uniswapV2Pair && to != uniswapV2Pair) {
+            _transfer(from, to, amount);
+            return;
+        }
+
+        uint256 feeAmount = 0;
+        if (from == uniswapV2Pair) {
+            feeAmount = (amount * feeBuy) / 100;
+        } else if (to == uniswapV2Pair) {
+            feeAmount = (amount * feeSell) / 100;
+        } else {
+            feeAmount = (amount * feeTransfer) / 100;
+        }
+
+        if (feeAmount > 0) {
+            _transfer(from, feeReceiver, feeAmount);
+            amount -= feeAmount;
+            _transfer(from, to, amount);
+        } else {
+            _transfer(from, to, amount);
+        }
     }
 }
