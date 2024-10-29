@@ -147,48 +147,6 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
     }
 
     /**
-     * @dev internal function for handling fee
-     * @param from The address of the sender
-     * @param to The address of the recipient
-     * @param amount The amount of tokens to transfer
-     */
-    function transfer(address from, address to, uint256 amount) internal {
-        require(from !=address(0), "ERC20: transfer from the zero address");
-        require(to != address(0), "ERC20: transfer to the zero address");
-        require(amount > 0, "Transfer amount must be greater than zero");
-        require(tradingEnabled || _isExcludedFromFee[from] || _isExcludedFromFee[to], "Trading is not enabled yet");
-
-        //Swap mechanism
-        uint256 accumulatedFee = balanceOf(address(this));
-        bool canSwap = accumulatedFee >= swapTokenAmount;
-
-        if(canSwap && swapEnabled && !swapping && to == uniswapV2Pair && !_isExcludedFromFee[from]) {
-            swapping = true;
-            _swapAndSendFee(accumulatedFee);
-            swapping = false;
-        }
-        
-        //Handling fee token and transfer
-        uint256 totalFees;
-        if(_isExcludedFromFee[from] || _isExcludedFromFee[to] || swapping) {
-            totalFees = 0;
-         } else if(from == uniswapV2Pair) {
-            totalFees = feeBuy;
-         } else if(to == uniswapV2Pair) {
-            totalFees = feeSell;
-         }else {
-            totalFees = feeTransfer;
-         }
-
-         if(totalFees > 0) {
-            uint256 feeTokenAmount = (amount * totalFees) / 100;
-            amount = amount - feeTokenAmount;
-            super._transfer(from, address(this), feeTokenAmount);
-         }
-         super._transfer(from, to, amount);
-    }
-
-    /**
      * @dev internal function for handling swap and send fee
      * @param tokenAmount The amount of tokens to swap and send
      */
