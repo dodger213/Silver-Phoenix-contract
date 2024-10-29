@@ -188,6 +188,7 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
      *@dev enable trading and swap
      */
     function enableTrading() external onlyOwner {
+        require(!tradingEnabled, "Trading is already enabled");
         tradingEnabled = true;
         swapEnabled = true;
     }
