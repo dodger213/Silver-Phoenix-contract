@@ -75,6 +75,13 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
     }
 
     /**
+    * @dev returns decimals
+    */
+    function decimals() public view virtual override returns (uint8) {
+        return 8;
+    }
+
+    /**
      * @dev internal function for transferring tokens
      * @param from The address of the sender
      * @param to The address of the recipient
@@ -88,6 +95,9 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
         require(amount > 0, "Transfer amount must be greater than zero");
+
+        //handling fee for transfer tokens from 'from' address to 'to' address
+        _handleFee(from, to, amount);
     }
 
     /**
@@ -144,7 +154,7 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
             return;
         }
         uint256 newBalance = address(this).balance - initialBalance;
-        
+
         //Send Fee to fee receiver
         payable(feeReceiver).sendValue(newBalance);
         emit SwapAndSendFee(tokenAmount, address(this).balance);
