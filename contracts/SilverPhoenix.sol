@@ -24,6 +24,7 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
     uint256 swapTokenAmount;
 
     bool swapEnabled;
+    bool tradingEnabled;
 
     mapping(address => bool) private _isExcludedFromFee;
 
@@ -76,8 +77,8 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
     }
 
     /**
-    * @dev returns decimals
-    */
+     * @dev returns decimals
+     */
     function decimals() public view virtual override returns (uint8) {
         return 8;
     }
@@ -96,9 +97,7 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
         require(amount > 0, "Transfer amount must be greater than zero");
-
-        //handling fee for transfer tokens from 'from' address to 'to' address
-        _handleFee(from, to, amount);
+        require(condition);
     }
 
     /**
@@ -185,7 +184,13 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
         bool _swapEnabled
     ) external onlyOwner {}
 
-    function enableTrading() external onlyOwner {}
+    /**
+     *@dev enable trading and swap
+     */
+    function enableTrading() external onlyOwner {
+        tradingEnabled = true;
+        swapEnabled = true;
+    }
 
     receive() external payable {}
 }
