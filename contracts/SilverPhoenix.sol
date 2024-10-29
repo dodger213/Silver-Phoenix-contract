@@ -201,10 +201,10 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
     }
 
     /**
-    *@dev exclude from fee
-    *@param account The address of the account to exclude from fee
-    *@param excluded Whether the account should be excluded from fee
-    */
+     *@dev exclude from fee
+     *@param account The address of the account to exclude from fee
+     *@param excluded Whether the account should be excluded from fee
+     */
     function excludeFromFees(
         address account,
         bool excluded
@@ -214,17 +214,31 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
     }
 
     /**
-    *@dev check if an account is excluded from fee
-    *@param account The address of the account to check
+     *@dev check if an account is excluded from fee
+     *@param account The address of the account to check
      */
     function isExcludedFromFees(address account) external view returns (bool) {
         return _isExcludedFromFee[account];
     }
 
+    /**
+     *@dev set Swap Token Amount
+     *@param newSwapTokenAmount The new swap token amount
+     *@param _swapEnabled Whether to enable swap
+     */
     function setSwapTokenAmount(
         uint256 newSwapTokenAmount,
         bool _swapEnabled
-    ) external onlyOwner {}
+    ) external onlyOwner {
+        require(
+            newSwapTokenAmount >= totalSupply() / 1_000_000,
+            "Swap Token Amount must be greater than 0.0001% of total supply"
+        );
+        uint256 oldSwapTokenAmount = swapTokenAmount;
+        swapTokenAmount = newSwapTokenAmount;
+        swapEnabled = _swapEnabled;
+        emit SwapAmountChanged(oldSwapTokenAmount, newSwapTokenAmount);
+    }
 
     /**
      *@dev enable trading and swap
