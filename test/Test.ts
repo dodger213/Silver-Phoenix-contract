@@ -1,16 +1,14 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SilverPhoenix } from "../typechain-types";
-import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 
 describe("SilverPhoenix", function () {
-  let silverPhoenix: SilverPhoenix;
-  let owner: SignerWithAddress;
-  let addr1: SignerWithAddress;
-  let addr2: SignerWithAddress;
-  let feeReceiver: SignerWithAddress;
+  let silverPhoenix: any;
+  let owner: any;
+  let addr1: any;
+  let addr2: any;
+  let feeReceiver: any;
 
-  beforeEach(async function () {
+  before(async function () {
     [owner, addr1, addr2, feeReceiver] = await ethers.getSigners();
     
     const SilverPhoenix = await ethers.getContractFactory("SilverPhoenix");
