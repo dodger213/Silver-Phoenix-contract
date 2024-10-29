@@ -200,10 +200,18 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
         );
     }
 
+    /**
+    *@dev exclude from fee
+    *@param account The address of the account to exclude from fee
+    *@param excluded Whether the account should be excluded from fee
+    */
     function excludeFromFees(
         address account,
         bool excluded
-    ) external onlyOwner {}
+    ) external onlyOwner {
+        _isExcludedFromFee[account] = excluded;
+        emit ExcludedFromFee(account, excluded);
+    }
 
     function isExcludedFromFees(address account) external view returns (bool) {}
 
