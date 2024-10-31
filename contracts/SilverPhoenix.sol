@@ -189,7 +189,7 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
     }
 
     /**
-     * @dev claim stuck tokens from contract
+     *@dev claim stuck tokens from contract
      *@param token The address of the token to claim
      */
     function claimStuckTokens(address token) external onlyOwner {
