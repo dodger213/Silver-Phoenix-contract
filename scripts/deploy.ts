@@ -2,12 +2,13 @@
 import { ethers } from 'hardhat';
 
 async function main() {
+  console.log('Deploying contracts... Please wait.')
   const [deployer] = await ethers.getSigners();
   console.log('Deploying contracts with the account:', deployer.address);
   const SilverPhoenix = await ethers.getContractFactory('SilverPhoenix');
   const silverPhoenix = await SilverPhoenix.deploy();
   await silverPhoenix.deployed();
-  console.log('SilverPhoenix deployed to:', silverPhoenix.address);
+  console.log('SilverPhoenix contract is deployed to:', silverPhoenix.address);
 }
 
 // This pattern allows the use of async/await throughout and ensures that errors are caught and handled properly.
