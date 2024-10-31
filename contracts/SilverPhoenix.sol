@@ -46,6 +46,7 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
         address router;
         address pinkLock;
 
+        //Uniswap router address and pinklock address
         if (block.chainid == 56) {
             router = 0x10ED43C718714eb63d5aA57B78B54704E256024E; // BSC Pancake Mainnet Router
             pinkLock = 0x407993575c91ce7643a4d4cCACc9A98c36eE1BBE; // BSC PinkLock
@@ -67,7 +68,8 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
         uniswapV2Pair = _uniswapV2Pair;
 
         _approve(address(this), address(uniswapV2Router), type(uint256).max);
-
+        
+        //Exclude fee on specific account
         _mint(msg.sender, 1e9 * 10 ** decimals());
         swapTokenAmount = totalSupply() / 5000;
 
