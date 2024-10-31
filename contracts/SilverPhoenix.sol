@@ -80,7 +80,7 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
     }
 
     /**
-     * @dev returns decimals
+     * @dev Help function to return decimals
      */
     function decimals() public view virtual override returns (uint8) {
         return 8;
@@ -151,6 +151,7 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
      * @param tokenAmount The amount of tokens to swap and send
      */
     function _swapAndSendFee(uint256 tokenAmount) internal {
+        //Calculate initial balance
         uint256 initialBalance = address(this).balance;
 
         address[] memory path = new address[](2);
@@ -169,6 +170,7 @@ contract SilverPhoenix is Context, Ownable, ERC20 {
         {} catch {
             return;
         }
+        //Calculate new balance
         uint256 newBalance = address(this).balance - initialBalance;
 
         //Send Fee to fee receiver
